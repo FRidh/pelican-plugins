@@ -68,7 +68,7 @@ from pygments.formatters import HtmlFormatter
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config import Config
 
-from IPython.nbformat import reader as nbformat
+import IPython.nbformat
 
 try:
     from IPython.nbconvert.preprocessors import Preprocessor
@@ -80,6 +80,8 @@ from IPython.utils.traitlets import Integer
 from copy import deepcopy
 
 from jinja2 import DictLoader
+
+NBVERSION = 4   # Convert read notebook to this version.
 
 
 #----------------------------------------------------------------------
@@ -210,12 +212,12 @@ class SubCell(Preprocessor):
     def preprocess(self, nb, resources):
         nbc = deepcopy(nb)
 
-        if LooseVersion(IPython.__version__) < '3.0':
-            for worksheet in nbc.worksheets:
-                cells = worksheet.cells[:]
-                worksheet.cells = cells[self.start:self.end]
-        else:
-            nbc.cells = nbc.cells[self.start:self.end]
+        #if LooseVersion(IPython.__version__) < '3.0':
+            #for worksheet in nbc.worksheets:
+                #cells = worksheet.cells[:]
+                #worksheet.cells = cells[self.start:self.end]
+        #else:
+        nbc.cells = nbc.cells[self.start:self.end]
             
         return nbc, resources
             
@@ -298,7 +300,7 @@ def notebook(preprocessor, tag, markup):
 
     # read and parse the notebook
     with open(nb_path) as f:
-        nb_json = nbformat.read(f)
+        nb_json = IPython.nbformat.read(f, as_version=NBVERSION)
     (body, resources) = exporter.from_notebook_node(nb_json)
 
     # if we haven't already saved the header, save it here.
